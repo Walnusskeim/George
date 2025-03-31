@@ -9,8 +9,10 @@ from discord.ext import commands
 class GeorgeCommands(commands.Cog):
     bot = commands.AutoShardedBot(commands.when_mentioned_or('/'), intents=discord.Intents.all())
 
+
     def __init__(self, bot):
         self.bot = bot
+
 
     def freigabe():
         async def case(ctx):
@@ -18,17 +20,36 @@ class GeorgeCommands(commands.Cog):
 
         return commands.check(case)
 
+
     @bot.hybrid_command()
     async def george(self, ctx):
         await ctx.send("What's good fam?")
 
+
     @bot.hybrid_command(description="Gibt dir Daten zu einem Item auf dem Hypixel Skyblock Bazaar")
     async def summary(self, ctx):
-        link = "https://api.slothpixel.me/api/skyblock/bazaar/HOT_POTATO_BOOK"
+        link = "https://api.hypixel.net/v2/skyblock/bazaar"
 
-        response = requests.get(link)
+        item_name = "ENDER_PEARL"
+
+        with open('data.txt', 'r') as file:
+            key = file.readline(3)
+            file.close()
+
+        header = {"API_KEY": key}
+
+        response = requests.get(link, headers = header)
         data = response.json()
-        data = data["buy_summary"]
+
+        if item_name in data["products"]:
+            item_data = data["products"][item_name]["buy_summary"]
+            print(f"Daten für {item_name}:")
+            print(f"  Buy Price: {item_data['buyPrice']}")
+            print(f"  Sell Price: {item_data['sellPrice']}")
+            print(f"  Buy Volume: {item_data['buyVolume']}")
+            print(f"  Sell Volume: {item_data['sellVolume']}")
+            await ctx.send(f"Daten für {item_name}:")
+            await ctx.send(f"  Buy Price: {item_data['buyPrice']}")
 
         await ctx.send(data)
 
